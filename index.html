@@ -1,0 +1,389 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desi YouTube - Home</title>
+    
+    <!-- FontAwesome for Pro Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* === Basic Reset & Setup === */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { background-color: #f0f0f0; color: #0f0f0f; padding-top: 60px; padding-bottom: 70px; overflow-x: hidden; }
+
+        /* === Top Navigation Bar === */
+        .top-bar {
+            position: fixed; top: 0; width: 100%; height: 60px; background: white;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 100;
+        }
+        .top-bar .logo img { height: 30px; }
+        .top-bar .icons i { font-size: 20px; margin-left: 20px; color: #0f0f0f; cursor: pointer; }
+
+        /* === Video Feed Grid === */
+        .feed-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; padding: 15px; }
+        
+        .video-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
+        .video-card:hover { transform: scale(1.02); }
+        .thumbnail-container { position: relative; width: 100%; padding-top: 56.25%; /* 16:9 Aspect Ratio */ background: #ccc; }
+        .thumbnail-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        .duration-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); color: white; padding: 3px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        
+        .video-info { display: flex; padding: 12px; }
+        .channel-dp { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; }
+        .video-text h3 { font-size: 16px; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .video-text p { font-size: 13px; color: #606060; }
+
+        /* === Video Modal (The Card that slides up) === */
+        .video-modal {
+            position: fixed; top: 100%; left: 0; width: 100%; height: 100vh;
+            background: white; z-index: 9999; transition: top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow-y: auto; padding-bottom: 80px;
+        }
+        .video-modal.active { top: 0; }
+
+        /* Custom Video Player UI */
+        .player-container { position: relative; width: 100%; background: black; aspect-ratio: 16/9; }
+        video { width: 100%; height: 100%; }
+        .player-controls {
+            position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 10px; display: flex; align-items: center; gap: 15px; color: white; opacity: 0; transition: opacity 0.3s;
+        }
+        .player-container:hover .player-controls { opacity: 1; }
+        .player-controls i { cursor: pointer; font-size: 18px; transition: 0.2s; }
+        .player-controls i:hover { color: #ff0000; }
+        .progress-container { flex-grow: 1; height: 5px; background: rgba(255,255,255,0.3); border-radius: 5px; cursor: pointer; position: relative; }
+        .progress-bar { height: 100%; background: #ff0000; width: 0%; border-radius: 5px; position: relative; }
+        .progress-bar::after { content: ''; position: absolute; right: -5px; top: -4px; width: 12px; height: 12px; background: white; border-radius: 50%; }
+
+        /* Modal Details */
+        .modal-details { padding: 15px; }
+        .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+        .modal-stats { font-size: 13px; color: #606060; margin-bottom: 15px; }
+        
+        .action-buttons { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
+        .action-buttons::-webkit-scrollbar { display: none; }
+        .action-btn {
+            background: #f2f2f2; border: none; padding: 10px 15px; border-radius: 20px;
+            font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap;
+        }
+        .action-btn.liked { color: #065fd4; background: #e5f1fb; } /* Blue when liked */
+        
+        .modal-desc-box { background: #f2f2f2; padding: 15px; border-radius: 12px; margin-top: 15px; font-size: 14px; white-space: pre-wrap; }
+        
+        /* Comments Section */
+        .comments-section { padding: 15px; border-top: 1px solid #ddd; margin-top: 20px; }
+        .comment-input { display: flex; gap: 10px; margin-top: 15px; }
+        .comment-input img { width: 35px; height: 35px; border-radius: 50%; }
+        .comment-input input { flex-grow: 1; border: none; border-bottom: 1px solid #ccc; outline: none; font-size: 14px; background: transparent; }
+        
+        /* Close Button (Animated) */
+        .close-modal-btn {
+            position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.5); color: white;
+            width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; z-index: 10; font-size: 18px; border: none; transition: transform 0.3s;
+        }
+        .close-modal-btn:hover { transform: rotate(90deg) scale(1.1); background: #ff0000; }
+
+        /* === Bottom Navigation === */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; height: 60px; background: white;
+            display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); z-index: 1000;
+        }
+        .nav-item { text-decoration: none; color: #606060; display: flex; flex-direction: column; align-items: center; font-size: 11px; width: 25%; }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-item.active { color: #0f0f0f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Top Bar -->
+    <div class="top-bar">
+        <div class="logo">
+            <!-- Png Image Here -->
+            <img src="https://i.ibb.co/iconinc.png" alt="Logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg'">
+        </div>
+        <div class="icons">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <i class="fa-regular fa-bell"></i>
+        </div>
+    </div>
+
+    <!-- 2. Main Feed (Data will come from JS/JSON) -->
+    <div class="feed-container" id="videoFeed">
+        <!-- JS will inject video cards here -->
+        <h3 style="text-align: center; width: 100%; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading Videos...</h3>
+    </div>
+
+    <!-- 3. Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+        <a href="shorts.html" class="nav-item"><i class="fa-solid fa-bolt"></i><span>Shorts</span></a>
+        <a href="create.html" class="nav-item"><i class="fa-solid fa-circle-plus"></i><span>Create</span></a>
+        <a href="about.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>About</span></a>
+    </div>
+
+    <!-- 4. Video Play Modal (Animated Slide Up) -->
+    <div class="video-modal" id="videoModal">
+        <!-- Close Button -->
+        <button class="close-modal-btn" onclick="closeVideo()"><i class="fa-solid fa-chevron-down"></i></button>
+
+        <!-- Custom Video Player -->
+        <div class="player-container">
+            <video id="myVideo" src=""></video>
+            <div class="player-controls">
+                <i class="fa-solid fa-play" id="playPauseBtn" onclick="togglePlay()"></i>
+                <div class="progress-container" id="progressContainer" onclick="seek(event)">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <span id="timeDisplay" style="font-size: 12px;">0:00 / 0:00</span>
+                <i class="fa-solid fa-volume-high" id="muteBtn" onclick="toggleMute()"></i>
+                <i class="fa-solid fa-expand" onclick="toggleFullScreen()"></i>
+            </div>
+        </div>
+
+        <!-- Video Details -->
+        <div class="modal-details">
+            <h2 class="modal-title" id="modalTitle">Video Title</h2>
+            <p class="modal-stats" id="modalStats">1M views • 2 days ago</p>
+
+            <div class="action-buttons">
+                <button class="action-btn" id="likeBtn" onclick="handleLike()">
+                    <i class="fa-regular fa-thumbs-up"></i> <span id="likeCount">Like</span>
+                </button>
+                <button class="action-btn"><i class="fa-regular fa-thumbs-down"></i></button>
+                <button class="action-btn" onclick="shareVideo()"><i class="fa-solid fa-share"></i> Share</button>
+                <!-- Download Button -->
+                <a href="#" id="downloadBtn" download class="action-btn" style="text-decoration: none; color: inherit;">
+                    <i class="fa-solid fa-download"></i> Download
+                </a>
+            </div>
+
+            <div class="modal-desc-box" id="modalDesc">
+                Description will appear here...
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <h3>Comments <span id="commentCount">(124)</span></h3>
+                <div class="comment-input">
+                    <img src="https://randomuser.me/api/portraits/lego/1.jpg" alt="User">
+                    <input type="text" placeholder="Add a comment...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === 1. JSON Data Simulation (Isi tarah tumhara real JSON hoga) ===
+        // Note: Google Drive videos ke liye link is format me hona chahiye:
+        // https://drive.google.com/uc?export=download&id=YOUR_FILE_ID
+        const dummyJsonData = [
+            {
+                id: "v1",
+                title: "My First Cinematic Vlog 2024! 🚀",
+                thumbnail: "https://images.unsplash.com/photo-1516280440503-6c8d7b3a4a16?w=600&q=80",
+                videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4", // Test Video
+                duration: "10:12",
+                views: "1.2M views",
+                date: "2 days ago",
+                channelName: "Desi Coder",
+                channelDp: "https://randomuser.me/api/portraits/men/32.jpg",
+                likes: 15400,
+                desc: "Bhai log ye mera naya video hai.\n\nUmeed hai aapko pasand aayega!\nPlz like aur share jarur karna.\n\n#vlog #desi #tech",
+                comments: 543
+            },
+            {
+                id: "v2",
+                title: "How to Make YouTube Clone in HTML CSS JS",
+                thumbnail: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80",
+                videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+                duration: "24:50",
+                views: "800K views",
+                date: "1 week ago",
+                channelName: "Code Master",
+                channelDp: "https://randomuser.me/api/portraits/men/44.jpg",
+                likes: 8900,
+                desc: "Is video me hum pro level coding sikhenge.\n\nSource code description me hai.",
+                comments: 120
+            }
+        ];
+
+        let currentVideoId = null;
+
+        // === 2. Fetch and Render Feed ===
+        function loadFeed() {
+            const feed = document.getElementById('videoFeed');
+            feed.innerHTML = ''; // Clear loading
+            
+            // In real life, use fetch('your-raw-json-link').then(...)
+            const data = dummyJsonData; 
+
+            data.forEach(video => {
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                // Pass video data object as JSON string to the function
+                card.onclick = () => openVideo(video); 
+
+                card.innerHTML = `
+                    <div class="thumbnail-container">
+                        <img src="${video.thumbnail}" alt="Thumbnail">
+                        <span class="duration-badge">${video.duration}</span>
+                    </div>
+                    <div class="video-info">
+                        <img src="${video.channelDp}" class="channel-dp" alt="Channel">
+                        <div class="video-text">
+                            <h3>${video.title}</h3>
+                            <p>${video.channelName}</p>
+                            <p>${video.views} • ${video.date}</p>
+                        </div>
+                    </div>
+                `;
+                feed.appendChild(card);
+            });
+        }
+
+        // === 3. Open Video Modal with Data ===
+        function openVideo(video) {
+            currentVideoId = video.id;
+            
+            // Update UI with JSON data
+            document.getElementById('modalTitle').innerText = video.title;
+            document.getElementById('modalStats').innerText = `${video.views} • ${video.date}`;
+            document.getElementById('modalDesc').innerText = video.desc;
+            document.getElementById('commentCount').innerText = `(${video.comments})`;
+            document.getElementById('likeCount').innerText = formatNumber(video.likes);
+            
+            // Set Download Link
+            document.getElementById('downloadBtn').href = video.videoUrl;
+
+            // Check LocalStorage for Likes
+            checkLikeStatus();
+
+            // Setup Custom Player
+            const myVideo = document.getElementById('myVideo');
+            myVideo.src = video.videoUrl;
+            
+            // Show Modal (Animated)
+            document.getElementById('videoModal').classList.add('active');
+            
+            // Auto Play
+            setTimeout(() => {
+                myVideo.play();
+                document.getElementById('playPauseBtn').className = "fa-solid fa-pause";
+            }, 500); // Wait for animation
+        }
+
+        // === 4. Close Video Modal ===
+        function closeVideo() {
+            document.getElementById('videoModal').classList.remove('active');
+            // Stop video
+            document.getElementById('myVideo').pause();
+            document.getElementById('playPauseBtn').className = "fa-solid fa-play";
+        }
+
+        // === 5. Like Feature (Saves to LocalStorage) ===
+        function handleLike() {
+            if(!currentVideoId) return;
+            
+            let likedVideos = JSON.parse(localStorage.getItem('liked_videos') || '[]');
+            const btn = document.getElementById('likeBtn');
+            const icon = btn.querySelector('i');
+
+            if(likedVideos.includes(currentVideoId)) {
+                // Unlike it
+                likedVideos = likedVideos.filter(id => id !== currentVideoId);
+                btn.classList.remove('liked');
+                icon.className = "fa-regular fa-thumbs-up";
+            } else {
+                // Like it
+                likedVideos.push(currentVideoId);
+                btn.classList.add('liked');
+                icon.className = "fa-solid fa-thumbs-up";
+            }
+            
+            localStorage.setItem('liked_videos', JSON.stringify(likedVideos));
+        }
+
+        function checkLikeStatus() {
+            let likedVideos = JSON.parse(localStorage.getItem('liked_videos') || '[]');
+            const btn = document.getElementById('likeBtn');
+            const icon = btn.querySelector('i');
+            
+            if(likedVideos.includes(currentVideoId)) {
+                btn.classList.add('liked');
+                icon.className = "fa-solid fa-thumbs-up";
+            } else {
+                btn.classList.remove('liked');
+                icon.className = "fa-regular fa-thumbs-up";
+            }
+        }
+
+        // Helper: Convert 1500 to 1.5K
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num;
+        }
+
+        // === 6. Custom Video Player Logic ===
+        const vid = document.getElementById('myVideo');
+        const playBtn = document.getElementById('playPauseBtn');
+        const progressBar = document.getElementById('progressBar');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const muteBtn = document.getElementById('muteBtn');
+
+        function togglePlay() {
+            if (vid.paused) { vid.play(); playBtn.className = "fa-solid fa-pause"; } 
+            else { vid.pause(); playBtn.className = "fa-solid fa-play"; }
+        }
+
+        vid.addEventListener('timeupdate', () => {
+            // Update Progress Bar
+            const percent = (vid.currentTime / vid.duration) * 100;
+            progressBar.style.width = percent + '%';
+            
+            // Update Time Text
+            let currentMins = Math.floor(vid.currentTime / 60);
+            let currentSecs = Math.floor(vid.currentTime % 60);
+            let totalMins = Math.floor(vid.duration / 60) || 0;
+            let totalSecs = Math.floor(vid.duration % 60) || 0;
+            
+            if(currentSecs < 10) currentSecs = "0" + currentSecs;
+            if(totalSecs < 10) totalSecs = "0" + totalSecs;
+            
+            timeDisplay.innerText = `${currentMins}:${currentSecs} / ${totalMins}:${totalSecs}`;
+        });
+
+        function seek(event) {
+            const container = document.getElementById('progressContainer');
+            const rect = container.getBoundingClientRect();
+            const pos = (event.clientX - rect.left) / container.offsetWidth;
+            vid.currentTime = pos * vid.duration;
+        }
+
+        function toggleMute() {
+            vid.muted = !vid.muted;
+            muteBtn.className = vid.muted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-high";
+        }
+
+        function toggleFullScreen() {
+            if (vid.requestFullscreen) { vid.requestFullscreen(); }
+            else if (vid.webkitRequestFullscreen) { vid.webkitRequestFullscreen(); } // Safari
+        }
+
+        function shareVideo() {
+            alert("Share link copied! 🚀");
+        }
+
+        // Initialize App
+        window.onload = loadFeed;
+
+    </script>
+</body>
+</html>
+
+```
