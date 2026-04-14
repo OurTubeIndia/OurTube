@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OurTube - Upload Video</title>
     
+    <!-- प्रोफेशनल आइकन्स के लिए -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Cloudinary की जादुई स्क्रिप्ट -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 
     <style>
@@ -86,18 +88,23 @@
 </head>
 <body>
 
+    <!-- 1. टॉप बार -->
     <div class="top-bar">
         <img src="https://i.ibb.co/RTHY13dF/IMG-20260414-ART0004.jpg" alt="Logo" oncontextmenu="return false;" draggable="false">
     </div>
 
+    <!-- टोस्ट मेसेज -->
     <div class="toast" id="toastMsg">Message Here</div>
 
+    <!-- 2. मेन फॉर्म कंटेनर -->
     <div class="main-container">
         
         <div class="page-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Creator Studio</div>
 
+        <!-- तुम्हारा Google Form Action Link -->
         <form action="https://docs.google.com/forms/d/e/1FAIpQLScwYQFLfaO3h777QpQj1_GoVSyFpiANJ93WdorM5rqMjEHHaA/formResponse" method="POST" target="hidden_iframe" id="uploadForm">
             
+            <!-- कार्ड 1: वीडियो अपलोड -->
             <div class="step-card">
                 <div class="step-title"><i class="fa-solid fa-cloud-arrow-up"></i> Step 1: Upload Video</div>
                 <button type="button" id="upload_video_btn" class="btn-upload">
@@ -105,9 +112,11 @@
                 </button>
                 <div id="video_success" class="success-text">✅ Video Uploaded Successfully!</div>
                 
+                <!-- हिडन इनपुट -->
                 <input type="hidden" id="videoLinkInput" name="entry.478593853" required>
             </div>
 
+            <!-- कार्ड 2: वीडियो डिटेल्स -->
             <div class="step-card">
                 <div class="step-title"><i class="fa-solid fa-pen-to-square"></i> Step 2: Video Details</div>
                 
@@ -130,6 +139,7 @@
                 </div>
             </div>
 
+            <!-- कार्ड 3: थंबनेल अपलोड -->
             <div class="step-card" id="thumbnailCard">
                 <div class="step-title"><i class="fa-solid fa-image" style="color:#28a745;"></i> Step 3: Thumbnail</div>
                 <p style="font-size:12px; color:#666; margin-bottom:10px;">Long video ke liye ek badhiya photo lagayein.</p>
@@ -139,17 +149,21 @@
                 </button>
                 <div id="thumb_success" class="success-text" style="color:#28a745;">✅ Thumbnail Uploaded!</div>
                 
+                <!-- हिडन इनपुट -->
                 <input type="hidden" id="thumbLinkInput" name="entry.1115628565">
             </div>
 
+            <!-- पब्लिश बटन -->
             <button type="submit" class="btn-publish"><i class="fa-solid fa-rocket"></i> Publish Video</button>
 
         </form>
 
     </div>
 
+    <!-- फॉर्म सबमिट होने पर पेज रीलोड से बचाने के लिए -->
     <iframe name="hidden_iframe" style="display:none;"></iframe>
 
+    <!-- 3. बॉटम नेविगेशन -->
     <div class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
         <a href="shorts.html" class="nav-item"><i class="fa-solid fa-bolt"></i><span>Shorts</span></a>
@@ -157,12 +171,12 @@
         <a href="about.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>About</span></a>
     </div>
 
+    <!-- === जावास्क्रिप्ट (असली जादू) === -->
     <script>
-        // तुम्हारे Cloudinary की सेटिंग्स ☁️🔑
+        // ✅ यहाँ मैंने नया Preset Name डाल दिया है!
         const myCloudName = 'dkssrlsc'; 
-        const myUploadPreset = 'ml_default'; 
+        const myUploadPreset = 'ourtube_up'; // <-- ये तुम्हारा नया Unsigned Preset है
 
-        // टोस्ट मेसेज दिखाने वाला फंक्शन
         function showToast(msg) {
             const toast = document.getElementById('toastMsg');
             toast.innerText = msg;
@@ -170,7 +184,6 @@
             setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
 
-        // शॉर्ट्स/लॉन्ग के हिसाब से थंबनेल कार्ड दिखाना या छुपाना 🪄
         function toggleThumbnailCard() {
             let type = document.getElementById('videoTypeSelector').value;
             let thumbCard = document.getElementById('thumbnailCard');
@@ -178,26 +191,25 @@
                 thumbCard.style.display = "block";
             } else {
                 thumbCard.style.display = "none";
-                document.getElementById('thumbLinkInput').value = ""; // शॉर्ट्स के लिए थंबनेल लिंक हटा दो
+                document.getElementById('thumbLinkInput').value = "";
             }
         }
 
         // === 1. Cloudinary Video Upload Widget ===
         var videoWidget = cloudinary.createUploadWidget({
             cloudName: myCloudName, 
-            uploadPreset: myUploadPreset,
+            uploadPreset: myUploadPreset, // Naya preset use hoga
             maxFiles: 1,
             clientAllowedFormats: ["mp4", "mov", "avi", "mkv"]
         }, (error, result) => { 
+            if (error) {
+                console.log("Upload Error:", error); // Error aayega to yaha dikhega
+            }
             if (!error && result && result.event === "success") { 
-                // जादुई तरीके से लिंक छुपाए हुए डिब्बे में भर जाएगा
                 document.getElementById("videoLinkInput").value = result.info.secure_url;
-                
-                // बटन का डिज़ाइन बदल दो
                 let btn = document.getElementById("upload_video_btn");
                 btn.style.background = "#065fd4"; btn.style.color = "white"; btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Video Uploaded';
                 document.getElementById("video_success").style.display = "block";
-                
                 showToast("🎥 Video Uploaded Successfully!");
             }
         });
@@ -207,17 +219,15 @@
         // === 2. Cloudinary Thumbnail Upload Widget ===
         var thumbWidget = cloudinary.createUploadWidget({
             cloudName: myCloudName, 
-            uploadPreset: myUploadPreset,
+            uploadPreset: myUploadPreset, // Naya preset use hoga
             maxFiles: 1,
             clientAllowedFormats: ["jpg", "png", "jpeg", "webp"]
         }, (error, result) => { 
             if (!error && result && result.event === "success") { 
                 document.getElementById("thumbLinkInput").value = result.info.secure_url;
-                
                 let btn = document.getElementById("upload_thumb_btn");
                 btn.style.background = "#28a745"; btn.style.color = "white"; btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Thumbnail Uploaded';
                 document.getElementById("thumb_success").style.display = "block";
-                
                 showToast("🖼️ Thumbnail Uploaded!");
             }
         });
@@ -226,18 +236,12 @@
 
         // === 3. Form Submit Logic ===
         document.getElementById('uploadForm').onsubmit = function() {
-            // चेक करो कि वीडियो अपलोड हुआ है या नहीं
             if(!document.getElementById('videoLinkInput').value) {
                 showToast("⚠️ Please upload the video first!");
-                return false; // फॉर्म सबमिट होने से रोको
+                return false; 
             }
-            
             showToast("🚀 Publishing your video... Please wait!");
-            
-            // 2.5 सेकंड बाद होम पेज पर भेज दो (ताकि बैकग्राउंड में फॉर्म सबमिट हो जाए)
-            setTimeout(() => { 
-                window.location.href = "index.html"; 
-            }, 2500);
+            setTimeout(() => { window.location.href = "index.html"; }, 2500);
         };
     </script>
 </body>
