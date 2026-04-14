@@ -1,94 +1,141 @@
-```html
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desi YouTube - Home</title>
+    <title>OurTube - Home</title>
     
-    <!-- FontAwesome for Pro Icons -->
+    <!-- असली और प्रो आइकन्स के लिए (FontAwesome) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* === Basic Reset & Setup === */
+        /* === बेसिक सेटअप === */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
         body { background-color: #f0f0f0; color: #0f0f0f; padding-top: 60px; padding-bottom: 70px; overflow-x: hidden; }
 
-        /* === Top Navigation Bar === */
+        /* === ऊपर का नेविगेशन बार (Top Bar) === */
         .top-bar {
             position: fixed; top: 0; width: 100%; height: 60px; background: white;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 0 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 100;
+            padding: 0 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 100;
         }
-        .top-bar .logo img { height: 30px; }
-        .top-bar .icons i { font-size: 20px; margin-left: 20px; color: #0f0f0f; cursor: pointer; }
-
-        /* === Video Feed Grid === */
-        .feed-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; padding: 15px; }
         
+        /* लोगो को सुरक्षित करने का CSS (कोई कॉपी या डाउनलोड नहीं कर पाएगा) */
+        .top-bar .logo img { 
+            height: 35px; 
+            border-radius: 5px;
+            pointer-events: none; /* क्लिक बंद */
+            user-select: none; /* सेलेक्ट करना बंद */
+            -webkit-user-drag: none; /* ड्रैग करना बंद */
+        }
+        
+        .top-bar .icons { display: flex; gap: 20px; align-items: center; }
+        .top-bar .icons i { font-size: 20px; color: #0f0f0f; cursor: pointer; }
+
+        /* === सर्च बार डिज़ाइन === */
+        .search-container {
+            position: fixed; top: 60px; left: 0; width: 100%; background: white;
+            padding: 10px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: none; /* शुरुआत में छुपा रहेगा */
+            z-index: 99; transition: 0.3s;
+        }
+        .search-container.active { display: flex; align-items: center; gap: 10px; }
+        .search-container input {
+            flex-grow: 1; padding: 10px 15px; border: 1px solid #ccc;
+            border-radius: 20px; outline: none; font-size: 14px;
+        }
+        .search-container button {
+            background: #f0f0f0; border: none; padding: 10px 15px;
+            border-radius: 20px; cursor: pointer;
+        }
+
+        /* === वीडियो फीड (Video Feed) === */
+        .feed-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; padding: 15px; }
         .video-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
         .video-card:hover { transform: scale(1.02); }
-        .thumbnail-container { position: relative; width: 100%; padding-top: 56.25%; /* 16:9 Aspect Ratio */ background: #ccc; }
+        .thumbnail-container { position: relative; width: 100%; padding-top: 56.25%; background: #ccc; }
         .thumbnail-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
         .duration-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); color: white; padding: 3px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        
         .video-info { display: flex; padding: 12px; }
         .channel-dp { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; }
         .video-text h3 { font-size: 16px; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .video-text p { font-size: 13px; color: #606060; }
 
-        /* === Video Modal (The Card that slides up) === */
+        /* === वीडियो प्लेयर वाला मोडल (Modal) === */
         .video-modal {
             position: fixed; top: 100%; left: 0; width: 100%; height: 100vh;
             background: white; z-index: 9999; transition: top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
             overflow-y: auto; padding-bottom: 80px;
         }
         .video-modal.active { top: 0; }
-
-        /* Custom Video Player UI */
-        .player-container { position: relative; width: 100%; background: black; aspect-ratio: 16/9; }
-        video { width: 100%; height: 100%; }
-        .player-controls {
-            position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.8));
-            padding: 10px; display: flex; align-items: center; gap: 15px; color: white; opacity: 0; transition: opacity 0.3s;
+        
+        .close-modal-btn {
+            position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.5); color: white;
+            width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; z-index: 10; border: none; font-size: 18px;
         }
-        .player-container:hover .player-controls { opacity: 1; }
+
+        /* === एडवांस वीडियो प्लेयर (Advanced Player) === */
+        .player-container { position: relative; width: 100%; background: black; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center;}
+        video { width: 100%; height: 100%; cursor: pointer; }
+        
+        /* बीच वाला प्ले/पॉज़ बटन */
+        .center-play-btn {
+            position: absolute; color: white; font-size: 50px; background: rgba(0,0,0,0.5);
+            width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 2;
+        }
+        .center-play-btn.show { opacity: 1; }
+
+        /* नीचे वाले कंट्रोल्स */
+        .player-controls {
+            position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.9));
+            padding: 10px; padding-bottom: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: 15px; color: white;
+            opacity: 0; transition: opacity 0.3s; z-index: 3;
+        }
+        .player-container:hover .player-controls, .player-controls:active { opacity: 1; }
+        
+        /* असली यूट्यूब जैसी प्रोग्रेस बार (Range Input) */
+        .progress-wrapper { width: 100%; margin-bottom: 5px; }
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%;
+            background: #ff0000; cursor: pointer; margin-top: -5px; box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.4); border-radius: 2px;
+        }
+
+        .control-buttons { display: flex; width: 100%; justify-content: space-between; align-items: center; }
+        .control-left, .control-right { display: flex; gap: 15px; align-items: center; }
         .player-controls i { cursor: pointer; font-size: 18px; transition: 0.2s; }
         .player-controls i:hover { color: #ff0000; }
-        .progress-container { flex-grow: 1; height: 5px; background: rgba(255,255,255,0.3); border-radius: 5px; cursor: pointer; position: relative; }
-        .progress-bar { height: 100%; background: #ff0000; width: 0%; border-radius: 5px; position: relative; }
-        .progress-bar::after { content: ''; position: absolute; right: -5px; top: -4px; width: 12px; height: 12px; background: white; border-radius: 50%; }
+        
+        /* स्पीड कंट्रोल बटन */
+        .speed-btn { background: transparent; color: white; border: 1px solid white; border-radius: 5px; padding: 2px 5px; font-size: 12px; cursor: pointer; font-weight: bold;}
 
-        /* Modal Details */
+        /* === मोडल की डिटेल्स (Modal Details) === */
         .modal-details { padding: 15px; }
         .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
         .modal-stats { font-size: 13px; color: #606060; margin-bottom: 15px; }
         
         .action-buttons { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
         .action-buttons::-webkit-scrollbar { display: none; }
-        .action-btn {
-            background: #f2f2f2; border: none; padding: 10px 15px; border-radius: 20px;
-            font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap;
-        }
-        .action-btn.liked { color: #065fd4; background: #e5f1fb; } /* Blue when liked */
+        .action-btn { background: #f2f2f2; border: none; padding: 10px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .action-btn.liked { color: #065fd4; background: #e5f1fb; } 
         
         .modal-desc-box { background: #f2f2f2; padding: 15px; border-radius: 12px; margin-top: 15px; font-size: 14px; white-space: pre-wrap; }
-        
-        /* Comments Section */
-        .comments-section { padding: 15px; border-top: 1px solid #ddd; margin-top: 20px; }
-        .comment-input { display: flex; gap: 10px; margin-top: 15px; }
-        .comment-input img { width: 35px; height: 35px; border-radius: 50%; }
-        .comment-input input { flex-grow: 1; border: none; border-bottom: 1px solid #ccc; outline: none; font-size: 14px; background: transparent; }
-        
-        /* Close Button (Animated) */
-        .close-modal-btn {
-            position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.5); color: white;
-            width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            cursor: pointer; z-index: 10; font-size: 18px; border: none; transition: transform 0.3s;
-        }
-        .close-modal-btn:hover { transform: rotate(90deg) scale(1.1); background: #ff0000; }
 
-        /* === Bottom Navigation === */
+        /* === टोस्ट नोटिफिकेशन (Toast Alert) === */
+        .toast-msg {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 10px 20px;
+            border-radius: 20px; font-size: 14px; display: none; z-index: 10000;
+        }
+
+        /* === नीचे का नेविगेशन (Bottom Nav) === */
         .bottom-nav {
             position: fixed; bottom: 0; width: 100%; height: 60px; background: white;
             display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); z-index: 1000;
@@ -100,25 +147,30 @@
 </head>
 <body>
 
-    <!-- 1. Top Bar -->
+    <!-- 1. टॉप बार और तुम्हारा लोगो -->
     <div class="top-bar">
         <div class="logo">
-            <!-- Png Image Here -->
-            <img src="https://i.ibb.co/iconinc.png" alt="Logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg'">
+            <!-- लोगो को सुरक्षित किया गया है (oncontextmenu से राइट-क्लिक बंद) -->
+            <img src="https://i.ibb.co/RTHY13dF/IMG-20260414-ART0004.jpg" alt="OurTube Logo" oncontextmenu="return false;" draggable="false">
         </div>
         <div class="icons">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <i class="fa-regular fa-bell"></i>
+            <i class="fa-solid fa-magnifying-glass" onclick="toggleSearch()"></i>
+            <i class="fa-regular fa-bell" onclick="showToast('🔔 अभी कोई नई नोटिफिकेशन नहीं है!')"></i>
         </div>
     </div>
 
-    <!-- 2. Main Feed (Data will come from JS/JSON) -->
-    <div class="feed-container" id="videoFeed">
-        <!-- JS will inject video cards here -->
-        <h3 style="text-align: center; width: 100%; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading Videos...</h3>
+    <!-- 2. सर्च बार (छुपा हुआ) -->
+    <div class="search-container" id="searchBar">
+        <input type="text" id="searchInput" placeholder="Search videos..." oninput="handleSearch()">
+        <button onclick="toggleSearch()"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
-    <!-- 3. Bottom Navigation -->
+    <!-- 3. मेन वीडियो फीड -->
+    <div class="feed-container" id="videoFeed">
+        <h3 style="text-align: center; width: 100%; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> इंटरनेट से वीडियो आ रहे हैं...</h3>
+    </div>
+
+    <!-- 4. नीचे का मेनू -->
     <div class="bottom-nav">
         <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
         <a href="shorts.html" class="nav-item"><i class="fa-solid fa-bolt"></i><span>Shorts</span></a>
@@ -126,119 +178,125 @@
         <a href="about.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>About</span></a>
     </div>
 
-    <!-- 4. Video Play Modal (Animated Slide Up) -->
+    <!-- 5. वीडियो प्लेयर मोडल -->
     <div class="video-modal" id="videoModal">
-        <!-- Close Button -->
         <button class="close-modal-btn" onclick="closeVideo()"><i class="fa-solid fa-chevron-down"></i></button>
 
-        <!-- Custom Video Player -->
-        <div class="player-container">
-            <video id="myVideo" src=""></video>
-            <div class="player-controls">
-                <i class="fa-solid fa-play" id="playPauseBtn" onclick="togglePlay()"></i>
-                <div class="progress-container" id="progressContainer" onclick="seek(event)">
-                    <div class="progress-bar" id="progressBar"></div>
+        <!-- एडवांस कस्टम प्लेयर -->
+        <div class="player-container" onclick="togglePlay()">
+            <video id="myVideo" playsinline></video>
+            
+            <!-- बीच वाला प्ले/पॉज़ आइकन -->
+            <div class="center-play-btn" id="centerPlayIcon">
+                <i class="fa-solid fa-play"></i>
+            </div>
+
+            <!-- नीचे के कंट्रोल्स -->
+            <div class="player-controls" onclick="event.stopPropagation()">
+                <!-- मस्त वाली प्रोग्रेस बार -->
+                <div class="progress-wrapper">
+                    <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1">
                 </div>
-                <span id="timeDisplay" style="font-size: 12px;">0:00 / 0:00</span>
-                <i class="fa-solid fa-volume-high" id="muteBtn" onclick="toggleMute()"></i>
-                <i class="fa-solid fa-expand" onclick="toggleFullScreen()"></i>
+                
+                <div class="control-buttons">
+                    <div class="control-left">
+                        <i class="fa-solid fa-play" id="playPauseBtn" onclick="togglePlay()"></i>
+                        <span id="timeDisplay" style="font-size: 13px;">0:00 / 0:00</span>
+                    </div>
+                    <div class="control-right">
+                        <!-- स्पीड बढ़ाने का बटन -->
+                        <button class="speed-btn" id="speedBtn" onclick="changeSpeed()">1x</button>
+                        <i class="fa-solid fa-volume-high" id="muteBtn" onclick="toggleMute()"></i>
+                        <i class="fa-solid fa-expand" onclick="toggleFullScreen()"></i>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Video Details -->
         <div class="modal-details">
-            <h2 class="modal-title" id="modalTitle">Video Title</h2>
-            <p class="modal-stats" id="modalStats">1M views • 2 days ago</p>
+            <h2 class="modal-title" id="modalTitle">Loading...</h2>
+            <p class="modal-stats" id="modalStats">...</p>
 
             <div class="action-buttons">
+                <!-- लाइक/अनलाइक बटन -->
                 <button class="action-btn" id="likeBtn" onclick="handleLike()">
                     <i class="fa-regular fa-thumbs-up"></i> <span id="likeCount">Like</span>
                 </button>
-                <button class="action-btn"><i class="fa-regular fa-thumbs-down"></i></button>
+                
+                <!-- प्रो शेयर बटन -->
                 <button class="action-btn" onclick="shareVideo()"><i class="fa-solid fa-share"></i> Share</button>
-                <!-- Download Button -->
+                
                 <a href="#" id="downloadBtn" download class="action-btn" style="text-decoration: none; color: inherit;">
                     <i class="fa-solid fa-download"></i> Download
                 </a>
             </div>
 
-            <div class="modal-desc-box" id="modalDesc">
-                Description will appear here...
-            </div>
-
-            <!-- Comments Section -->
-            <div class="comments-section">
-                <h3>Comments <span id="commentCount">(124)</span></h3>
-                <div class="comment-input">
-                    <img src="https://randomuser.me/api/portraits/lego/1.jpg" alt="User">
-                    <input type="text" placeholder="Add a comment...">
-                </div>
-            </div>
+            <div class="modal-desc-box" id="modalDesc"></div>
         </div>
     </div>
 
+    <!-- टोस्ट मेसेज बॉक्स -->
+    <div class="toast-msg" id="toastMsg">Message Here</div>
+
+    <!-- === यहाँ से जावास्क्रिप्ट (जादू) शुरू === -->
     <script>
-        // === 1. JSON Data Simulation (Isi tarah tumhara real JSON hoga) ===
-        // Note: Google Drive videos ke liye link is format me hona chahiye:
-        // https://drive.google.com/uc?export=download&id=YOUR_FILE_ID
-        const dummyJsonData = [
-            {
-                id: "v1",
-                title: "My First Cinematic Vlog 2024! 🚀",
-                thumbnail: "https://images.unsplash.com/photo-1516280440503-6c8d7b3a4a16?w=600&q=80",
-                videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4", // Test Video
-                duration: "10:12",
-                views: "1.2M views",
-                date: "2 days ago",
-                channelName: "Desi Coder",
-                channelDp: "https://randomuser.me/api/portraits/men/32.jpg",
-                likes: 15400,
-                desc: "Bhai log ye mera naya video hai.\n\nUmeed hai aapko pasand aayega!\nPlz like aur share jarur karna.\n\n#vlog #desi #tech",
-                comments: 543
-            },
-            {
-                id: "v2",
-                title: "How to Make YouTube Clone in HTML CSS JS",
-                thumbnail: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80",
-                videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-                duration: "24:50",
-                views: "800K views",
-                date: "1 week ago",
-                channelName: "Code Master",
-                channelDp: "https://randomuser.me/api/portraits/men/44.jpg",
-                likes: 8900,
-                desc: "Is video me hum pro level coding sikhenge.\n\nSource code description me hai.",
-                comments: 120
+        let allVideos = []; // सारे वीडियो यहाँ सेव होंगे
+        let currentVideoObj = null;
+
+        // 1. GitHub से JSON डेटा मँगाना (Fetch API) 🌐
+        async function fetchVideos() {
+            try {
+                // तुम्हारी GitHub लिंक
+                const response = await fetch('https://raw.githubusercontent.com/OurTubeIndia/OurTube/main/videos.json');
+                
+                if(!response.ok) throw new Error("JSON नहीं मिला!");
+                
+                let data = await response.json();
+                
+                // वीडियो को Random (उल्टा-पुल्टा) करना ताकि हर बार नया दिखे
+                allVideos = data.sort(() => 0.5 - Math.random()); 
+                
+                renderFeed(allVideos);
+            } catch (error) {
+                console.log("GitHub लिंक में दिक्कत है, डमी डेटा दिखा रहे हैं...", error);
+                // अगर तुम्हारी लिंक अभी काम नहीं कर रही, तो ऐप खराब ना हो इसलिए बैकअप डेटा
+                allVideos = [
+                    {
+                        id: "v1", title: "Testing OurTube Advanced Player 🔥", thumbnail: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600",
+                        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4", duration: "0:10", views: "1.5M views", date: "Just now",
+                        channelName: "OurTube Official", channelDp: "https://randomuser.me/api/portraits/men/1.jpg", likes: 5000, desc: "Welcome to OurTube!"
+                    }
+                ];
+                renderFeed(allVideos);
             }
-        ];
+        }
 
-        let currentVideoId = null;
-
-        // === 2. Fetch and Render Feed ===
-        function loadFeed() {
+        // 2. वीडियो को स्क्रीन पर दिखाना 📺
+        function renderFeed(videosData) {
             const feed = document.getElementById('videoFeed');
-            feed.innerHTML = ''; // Clear loading
+            feed.innerHTML = ''; // लोडिंग टेक्स्ट हटाओ
             
-            // In real life, use fetch('your-raw-json-link').then(...)
-            const data = dummyJsonData; 
+            if(videosData.length === 0) {
+                feed.innerHTML = '<h3 style="text-align:center; width:100%; color:red;">कोई वीडियो नहीं मिला!</h3>';
+                return;
+            }
 
-            data.forEach(video => {
+            videosData.forEach(video => {
                 const card = document.createElement('div');
                 card.className = 'video-card';
-                // Pass video data object as JSON string to the function
                 card.onclick = () => openVideo(video); 
 
                 card.innerHTML = `
                     <div class="thumbnail-container">
                         <img src="${video.thumbnail}" alt="Thumbnail">
-                        <span class="duration-badge">${video.duration}</span>
+                        <span class="duration-badge">${video.duration || 'Live'}</span>
                     </div>
                     <div class="video-info">
-                        <img src="${video.channelDp}" class="channel-dp" alt="Channel">
+                        <img src="${video.channelDp || 'https://randomuser.me/api/portraits/lego/1.jpg'}" class="channel-dp">
                         <div class="video-text">
                             <h3>${video.title}</h3>
-                            <p>${video.channelName}</p>
-                            <p>${video.views} • ${video.date}</p>
+                            <p>${video.channelName || 'Unknown User'}</p>
+                            <p>${video.views || '0 views'} • ${video.date || 'Today'}</p>
                         </div>
                     </div>
                 `;
@@ -246,144 +304,180 @@
             });
         }
 
-        // === 3. Open Video Modal with Data ===
+        // 3. सर्च सिस्टम (Search Logic) 🔍
+        function toggleSearch() {
+            document.getElementById('searchBar').classList.toggle('active');
+            document.getElementById('searchInput').focus();
+        }
+
+        function handleSearch() {
+            let query = document.getElementById('searchInput').value.toLowerCase();
+            // जो टाइटल मैच करेगा, सिर्फ वही दिखेगा
+            let filtered = allVideos.filter(v => v.title.toLowerCase().includes(query));
+            renderFeed(filtered);
+        }
+
+        // 4. वीडियो खोलना (Open Video) 🎬
         function openVideo(video) {
-            currentVideoId = video.id;
+            currentVideoObj = video;
             
-            // Update UI with JSON data
             document.getElementById('modalTitle').innerText = video.title;
             document.getElementById('modalStats').innerText = `${video.views} • ${video.date}`;
-            document.getElementById('modalDesc').innerText = video.desc;
-            document.getElementById('commentCount').innerText = `(${video.comments})`;
-            document.getElementById('likeCount').innerText = formatNumber(video.likes);
-            
-            // Set Download Link
+            document.getElementById('modalDesc').innerText = video.desc || "No description.";
+            document.getElementById('likeCount').innerText = video.likes || "Like";
             document.getElementById('downloadBtn').href = video.videoUrl;
 
-            // Check LocalStorage for Likes
             checkLikeStatus();
 
-            // Setup Custom Player
             const myVideo = document.getElementById('myVideo');
             myVideo.src = video.videoUrl;
             
-            // Show Modal (Animated)
+            // स्पीड को वापस 1x कर दो
+            myVideo.playbackRate = 1;
+            document.getElementById('speedBtn').innerText = "1x";
+            
             document.getElementById('videoModal').classList.add('active');
             
-            // Auto Play
-            setTimeout(() => {
-                myVideo.play();
-                document.getElementById('playPauseBtn').className = "fa-solid fa-pause";
-            }, 500); // Wait for animation
+            setTimeout(() => { togglePlay(true); }, 300); 
         }
 
-        // === 4. Close Video Modal ===
         function closeVideo() {
             document.getElementById('videoModal').classList.remove('active');
-            // Stop video
-            document.getElementById('myVideo').pause();
-            document.getElementById('playPauseBtn').className = "fa-solid fa-play";
+            togglePlay(false);
         }
 
-        // === 5. Like Feature (Saves to LocalStorage) ===
+        // 5. लाइक का सिस्टम (Local Storage) 👍
         function handleLike() {
-            if(!currentVideoId) return;
-            
-            let likedVideos = JSON.parse(localStorage.getItem('liked_videos') || '[]');
+            if(!currentVideoObj) return;
+            let likedVideos = JSON.parse(localStorage.getItem('ourtube_likes') || '[]');
             const btn = document.getElementById('likeBtn');
             const icon = btn.querySelector('i');
 
-            if(likedVideos.includes(currentVideoId)) {
-                // Unlike it
-                likedVideos = likedVideos.filter(id => id !== currentVideoId);
+            if(likedVideos.includes(currentVideoObj.id)) {
+                likedVideos = likedVideos.filter(id => id !== currentVideoObj.id); // Unlike
                 btn.classList.remove('liked');
                 icon.className = "fa-regular fa-thumbs-up";
             } else {
-                // Like it
-                likedVideos.push(currentVideoId);
+                likedVideos.push(currentVideoObj.id); // Like
                 btn.classList.add('liked');
                 icon.className = "fa-solid fa-thumbs-up";
+                showToast("वीडियो लाइक कर दिया! ❤️");
             }
-            
-            localStorage.setItem('liked_videos', JSON.stringify(likedVideos));
+            localStorage.setItem('ourtube_likes', JSON.stringify(likedVideos));
         }
 
         function checkLikeStatus() {
-            let likedVideos = JSON.parse(localStorage.getItem('liked_videos') || '[]');
+            let likedVideos = JSON.parse(localStorage.getItem('ourtube_likes') || '[]');
             const btn = document.getElementById('likeBtn');
             const icon = btn.querySelector('i');
             
-            if(likedVideos.includes(currentVideoId)) {
-                btn.classList.add('liked');
-                icon.className = "fa-solid fa-thumbs-up";
+            if(currentVideoObj && likedVideos.includes(currentVideoObj.id)) {
+                btn.classList.add('liked'); icon.className = "fa-solid fa-thumbs-up";
             } else {
-                btn.classList.remove('liked');
-                icon.className = "fa-regular fa-thumbs-up";
+                btn.classList.remove('liked'); icon.className = "fa-regular fa-thumbs-up";
             }
         }
 
-        // Helper: Convert 1500 to 1.5K
-        function formatNumber(num) {
-            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-            return num;
+        // 6. असली शेयर बटन (Native Share API) 📤
+        function shareVideo() {
+            if (navigator.share && currentVideoObj) {
+                navigator.share({
+                    title: currentVideoObj.title,
+                    text: 'OurTube पर ये मस्त वीडियो देखो!',
+                    url: currentVideoObj.videoUrl
+                }).catch(err => console.log(err));
+            } else {
+                // अगर ब्राउज़र सपोर्ट ना करे तो लिंक कॉपी कर दो
+                navigator.clipboard.writeText(currentVideoObj ? currentVideoObj.videoUrl : window.location.href);
+                showToast("लिंक कॉपी हो गया! 📋");
+            }
         }
 
-        // === 6. Custom Video Player Logic ===
+        // 7. एडवांस वीडियो प्लेयर कंट्रोल्स ⚙️
         const vid = document.getElementById('myVideo');
         const playBtn = document.getElementById('playPauseBtn');
+        const centerIcon = document.getElementById('centerPlayIcon');
         const progressBar = document.getElementById('progressBar');
         const timeDisplay = document.getElementById('timeDisplay');
-        const muteBtn = document.getElementById('muteBtn');
 
-        function togglePlay() {
-            if (vid.paused) { vid.play(); playBtn.className = "fa-solid fa-pause"; } 
-            else { vid.pause(); playBtn.className = "fa-solid fa-play"; }
+        function togglePlay(forcePlay) {
+            if (forcePlay === true || vid.paused) { 
+                vid.play(); 
+                playBtn.className = "fa-solid fa-pause"; 
+                showCenterIcon("fa-pause");
+            } else { 
+                vid.pause(); 
+                playBtn.className = "fa-solid fa-play"; 
+                showCenterIcon("fa-play");
+            }
         }
 
+        // बीच वाले आइकन का एनिमेशन
+        function showCenterIcon(iconClass) {
+            centerIcon.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
+            centerIcon.classList.add('show');
+            setTimeout(() => { centerIcon.classList.remove('show'); }, 600);
+        }
+
+        // वीडियो स्पीड बदलना (1x, 1.5x, 2x)
+        function changeSpeed() {
+            let speeds = [1, 1.5, 2, 0.5];
+            let current = vid.playbackRate;
+            let nextIndex = (speeds.indexOf(current) + 1) % speeds.length;
+            vid.playbackRate = speeds[nextIndex];
+            document.getElementById('speedBtn').innerText = speeds[nextIndex] + "x";
+            showToast("स्पीड: " + speeds[nextIndex] + "x");
+        }
+
+        // प्रोग्रेस बार अपडेट करना (Range Input के साथ)
         vid.addEventListener('timeupdate', () => {
-            // Update Progress Bar
-            const percent = (vid.currentTime / vid.duration) * 100;
-            progressBar.style.width = percent + '%';
-            
-            // Update Time Text
-            let currentMins = Math.floor(vid.currentTime / 60);
-            let currentSecs = Math.floor(vid.currentTime % 60);
-            let totalMins = Math.floor(vid.duration / 60) || 0;
-            let totalSecs = Math.floor(vid.duration % 60) || 0;
-            
-            if(currentSecs < 10) currentSecs = "0" + currentSecs;
-            if(totalSecs < 10) totalSecs = "0" + totalSecs;
-            
-            timeDisplay.innerText = `${currentMins}:${currentSecs} / ${totalMins}:${totalSecs}`;
+            if(vid.duration) {
+                const percent = (vid.currentTime / vid.duration) * 100;
+                progressBar.value = percent; // इनपुट रेंज को खिसकाओ
+                // पीछे का लाल रंग भरने के लिए CSS Variable सेट करो
+                progressBar.style.background = `linear-gradient(to right, #ff0000 ${percent}%, rgba(255,255,255,0.4) ${percent}%)`;
+                
+                // समय अपडेट करो
+                timeDisplay.innerText = formatTime(vid.currentTime) + " / " + formatTime(vid.duration);
+            }
         });
 
-        function seek(event) {
-            const container = document.getElementById('progressContainer');
-            const rect = container.getBoundingClientRect();
-            const pos = (event.clientX - rect.left) / container.offsetWidth;
-            vid.currentTime = pos * vid.duration;
+        // जब यूज़र प्रोग्रेस बार को उंगली से खींचे (Scrubbing)
+        progressBar.addEventListener('input', (e) => {
+            const seekTime = (e.target.value / 100) * vid.duration;
+            vid.currentTime = seekTime;
+        });
+
+        function formatTime(seconds) {
+            let m = Math.floor(seconds / 60);
+            let s = Math.floor(seconds % 60);
+            return m + ":" + (s < 10 ? "0" + s : s);
         }
 
         function toggleMute() {
             vid.muted = !vid.muted;
-            muteBtn.className = vid.muted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-high";
+            document.getElementById('muteBtn').className = vid.muted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-high";
         }
 
         function toggleFullScreen() {
-            if (vid.requestFullscreen) { vid.requestFullscreen(); }
-            else if (vid.webkitRequestFullscreen) { vid.webkitRequestFullscreen(); } // Safari
+            if (vid.requestFullscreen) vid.requestFullscreen();
+            else if (vid.webkitRequestFullscreen) vid.webkitRequestFullscreen();
         }
 
-        function shareVideo() {
-            alert("Share link copied! 🚀");
+        // टोस्ट नोटिफिकेशन दिखाना
+        function showToast(msg) {
+            const toast = document.getElementById('toastMsg');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2500);
         }
 
-        // Initialize App
-        window.onload = loadFeed;
+        // शुरुआत: पेज लोड होते ही डेटा मँगाना
+        window.onload = fetchVideos;
 
     </script>
 </body>
 </html>
+
 
 ```
