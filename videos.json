@@ -1,0 +1,33 @@
+```json
+[
+  {
+    "id": "v1",
+    "title": "My First Cinematic Vlog 2024! 🚀",
+    "thumbnail": "https://images.unsplash.com/photo-1516280440503-6c8d7b3a4a16?w=600&q=80",
+    "videoUrl": "https://www.w3schools.com/html/mov_bbb.mp4",
+    "duration": "10:12",
+    "views": "1.2M views",
+    "date": "2 days ago",
+    "channelName": "Desi Coder",
+    "channelDp": "https://randomuser.me/api/portraits/men/32.jpg",
+    "likes": 15400,
+    "desc": "Bhai log ye mera naya video hai.\n\nUmeed hai aapko pasand aayega!\nPlz like aur share jarur karna.\n\n#vlog #desi #tech",
+    "comments": 543
+  },
+  {
+    "id": "v2",
+    "title": "How to Make YouTube Clone in HTML CSS JS",
+    "thumbnail": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80",
+    "videoUrl": "https://drive.google.com/uc?export=download&id=TUMHARI_VIDEO_KI_ID", 
+    "duration": "24:50",
+    "views": "800K views",
+    "date": "1 week ago",
+    "channelName": "Code Master",
+    "channelDp": "https://randomuser.me/api/portraits/men/44.jpg",
+    "likes": 8900,
+    "desc": "Is video me hum pro level coding sikhenge.\n\nSource code description me hai.",
+    "comments": 120
+  }
+]
+
+```
