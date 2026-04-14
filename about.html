@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OurTube - About Us</title>
+    
+    <!-- असली और प्रो आइकन्स के लिए (FontAwesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* === बेसिक सेटअप === */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { background-color: #f4f6f8; color: #0f0f0f; padding-top: 70px; padding-bottom: 80px; overflow-x: hidden; }
+
+        /* === ऊपर का नेविगेशन बार (Top Bar) === */
+        .top-bar {
+            position: fixed; top: 0; width: 100%; height: 60px; background: white;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 100;
+        }
+        
+        /* लोगो को सुरक्षित करने का CSS */
+        .top-bar .logo img { 
+            height: 35px; border-radius: 5px;
+            pointer-events: none; user-select: none; -webkit-user-drag: none;
+        }
+        .top-bar .icons { display: flex; gap: 20px; align-items: center; }
+        .top-bar .icons i { font-size: 20px; color: #0f0f0f; cursor: pointer; }
+
+        /* === About Page Main Content === */
+        .about-container {
+            max-width: 600px; margin: 0 auto; padding: 0 15px;
+        }
+
+        /* Hero Section (लोगो और नाम) */
+        .hero-section {
+            text-align: center; padding: 20px 0 30px 0;
+        }
+        .hero-section img {
+            width: 80px; height: 80px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            pointer-events: none; user-select: none; margin-bottom: 15px;
+        }
+        .hero-section h1 { font-size: 24px; color: #111; margin-bottom: 5px; }
+        .hero-section p { font-size: 14px; color: #666; }
+        .version-badge {
+            display: inline-block; background: #e5f1fb; color: #065fd4;
+            padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-top: 10px;
+        }
+
+        /* === कार्ड्स (Accordion Cards) === */
+        .cards-wrapper { display: flex; flex-direction: column; gap: 15px; }
+
+        .faq-card {
+            background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden; transition: all 0.3s ease;
+        }
+        
+        .faq-header {
+            padding: 18px 20px; display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; font-weight: bold; font-size: 15px; color: #222;
+        }
+        
+        .faq-header i { transition: transform 0.3s ease; color: #666; }
+        
+        /* कार्ड के अंदर का कंटेंट (Smooth Animation के साथ) */
+        .faq-content-wrapper {
+            display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease;
+        }
+        .faq-content { overflow: hidden; }
+        .faq-text {
+            padding: 0 20px 20px 20px; font-size: 14px; color: #555; line-height: 1.6; border-top: 1px solid #f0f0f0; margin-top: 5px; padding-top: 15px;
+        }
+
+        /* जब कार्ड एक्टिव (खुला) हो */
+        .faq-card.active { box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 1px solid #e0e0e0; }
+        .faq-card.active .faq-header i { transform: rotate(180deg); color: #ff0000; }
+        .faq-card.active .faq-content-wrapper { grid-template-rows: 1fr; }
+
+        /* Social Media Section */
+        .social-links {
+            display: flex; justify-content: center; gap: 20px; margin-top: 40px; margin-bottom: 20px;
+        }
+        .social-links a {
+            width: 45px; height: 45px; background: white; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            color: #333; font-size: 20px; text-decoration: none; box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+        .social-links a:hover { transform: translateY(-3px); background: #ff0000; color: white; }
+
+        /* === टोस्ट नोटिफिकेशन (Toast Alert) === */
+        .toast-msg {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 10px 20px;
+            border-radius: 20px; font-size: 14px; display: none; z-index: 10000;
+        }
+
+        /* === नीचे का नेविगेशन (Bottom Nav) === */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; height: 60px; background: white;
+            display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); z-index: 1000;
+        }
+        .nav-item { text-decoration: none; color: #606060; display: flex; flex-direction: column; align-items: center; font-size: 11px; width: 25%; }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-item.active { color: #0f0f0f; font-weight: bold; } /* About पेज एक्टिव है */
+    </style>
+</head>
+<body>
+
+    <!-- 1. टॉप बार (सेम टू सेम) -->
+    <div class="top-bar">
+        <div class="logo">
+            <img src="https://i.ibb.co/RTHY13dF/IMG-20260414-ART0004.jpg" alt="OurTube Logo" oncontextmenu="return false;" draggable="false">
+        </div>
+        <div class="icons">
+            <i class="fa-solid fa-magnifying-glass" onclick="showToast('सर्च बार Home पेज पर काम करता है!')"></i>
+            <i class="fa-regular fa-bell" onclick="showToast('🔔 अभी कोई नई नोटिफिकेशन नहीं है!')"></i>
+        </div>
+    </div>
+
+    <!-- 2. मेन About Content -->
+    <div class="about-container">
+        
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <img src="https://i.ibb.co/RTHY13dF/IMG-20260414-ART0004.jpg" alt="OurTube Icon">
+            <h1>Welcome to OurTube</h1>
+            <p>आपका अपना वीडियो शेयरिंग प्लेटफॉर्म ❤️</p>
+            <span class="version-badge">Version 1.0.0 (Pro)</span>
+        </div>
+
+        <!-- 3. Accordion Cards (मस्त वाले कार्ड्स) -->
+        <div class="cards-wrapper">
+
+            <!-- Card 1 -->
+            <div class="faq-card" onclick="toggleCard(this)">
+                <div class="faq-header">
+                    <span><i class="fa-solid fa-circle-question" style="margin-right:8px; color:#065fd4;"></i> OurTube क्या है?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="faq-content-wrapper">
+                    <div class="faq-content">
+                        <div class="faq-text">
+                            भाई, OurTube एक एकदम झक्कास मेड इन इंडिया वीडियो प्लेटफॉर्म है! यहाँ आप बिना किसी झंझट के अपने टैलेंट को दुनिया के सामने दिखा सकते हैं। एकदम यूट्यूब जैसी फीलिंग, लेकिन अपने देसी स्वैग के साथ! 😎
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="faq-card" onclick="toggleCard(this)">
+                <div class="faq-header">
+                    <span><i class="fa-solid fa-shield-halved" style="margin-right:8px; color:#28a745;"></i> Privacy Policy (प्राइवेसी)</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="faq-content-wrapper">
+                    <div class="faq-content">
+                        <div class="faq-text">
+                            <b>आपकी प्राइवेसी हमारी जिम्मेदारी है! 🛡️</b><br><br>
+                            - हम आपका पर्सनल डेटा किसी थर्ड-पार्टी कंपनी को नहीं बेचते।<br>
+                            - आपके द्वारा सेव किए गए लाइक्स (Likes) आपके ही डिवाइस (लोकल स्टोरेज) में सुरक्षित रहते हैं।<br>
+                            - आप जो भी वीडियो अपलोड करते हैं, वो हमारे सुरक्षित सर्वर (Google Drive) पर रहती है।
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="faq-card" onclick="toggleCard(this)">
+                <div class="faq-header">
+                    <span><i class="fa-solid fa-file-contract" style="margin-right:8px; color:#ff9900;"></i> Terms & Conditions (नियम)</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="faq-content-wrapper">
+                    <div class="faq-content">
+                        <div class="faq-text">
+                            प्लेटफॉर्म को साफ-सुथरा रखने के लिए कुछ नियम हैं भाई:<br><br>
+                            1. ❌ <b>कोई कॉपीराइट नहीं:</b> दूसरों का चुराया हुआ वीडियो मत डालना।<br>
+                            2. ❌ <b>कोई हिंसा नहीं:</b> लड़ाई-झगड़े या गलत कंटेंट अपलोड करना सख्त मना है।<br>
+                            3. ✅ <b>मैन्युअल रिव्यू:</b> हर वीडियो अपलोड होने के बाद हमारी टीम द्वारा चेक किया जाएगा। अगर सब सही रहा, तो वो पब्लिक हो जाएगा!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="faq-card" onclick="toggleCard(this)">
+                <div class="faq-header">
+                    <span><i class="fa-solid fa-sack-dollar" style="margin-right:8px; color:#ff0000;"></i> क्या यहाँ से पैसे कमा सकते हैं?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="faq-content-wrapper">
+                    <div class="faq-content">
+                        <div class="faq-text">
+                            <b>मोनेटाइजेशन बहुत जल्द आ रहा है! 🚀</b><br><br>
+                            अभी हमारा प्लेटफॉर्म नया है, लेकिन आगे चलकर जब आपके अच्छे खासे व्यूज (Views) आने लगेंगे, तो हम मोनेटाइजेशन का फीचर भी चालू करेंगे जिससे आप मस्त कमाई कर सकेंगे!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="faq-card" onclick="toggleCard(this)">
+                <div class="faq-header">
+                    <span><i class="fa-solid fa-headset" style="margin-right:8px; color:#6f42c1;"></i> Contact Us (संपर्क करें)</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="faq-content-wrapper">
+                    <div class="faq-content">
+                        <div class="faq-text">
+                            अगर आपको कोई दिक्कत आ रही है या कोई सुझाव देना है, तो आप हमें यहाँ मेल कर सकते हैं:<br><br>
+                            📧 <b>support@ourtube.com</b><br>
+                            हम 24 घंटे के अंदर आपको जवाब देने की पूरी कोशिश करेंगे!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Social Media Buttons -->
+        <div class="social-links">
+            <a href="#" onclick="showToast('Instagram जल्द ही जुड़ेगा!')"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" onclick="showToast('Twitter जल्द ही जुड़ेगा!')"><i class="fa-brands fa-twitter"></i></a>
+            <a href="#" onclick="showToast('Facebook जल्द ही जुड़ेगा!')"><i class="fa-brands fa-facebook-f"></i></a>
+        </div>
+
+    </div>
+
+    <!-- टोस्ट मेसेज बॉक्स -->
+    <div class="toast-msg" id="toastMsg">Message Here</div>
+
+    <!-- 4. नीचे का मेनू (Bottom Nav) -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+        <a href="shorts.html" class="nav-item"><i class="fa-solid fa-bolt"></i><span>Shorts</span></a>
+        <a href="create.html" class="nav-item"><i class="fa-solid fa-circle-plus"></i><span>Create</span></a>
+        <!-- यह About पेज है, इसलिए यह 'active' है (काला और बोल्ड) -->
+        <a href="about.html" class="nav-item active"><i class="fa-solid fa-circle-info"></i><span>About</span></a>
+    </div>
+
+    <!-- === जावास्क्रिप्ट (जादू) === -->
+    <script>
+        // कार्ड्स को खोलने और बंद करने का लॉजिक (Accordion Logic) 🪄
+        function toggleCard(clickedCard) {
+            // चेक करो कि जो कार्ड क्लिक किया है, वो पहले से खुला है या बंद
+            let isActive = clickedCard.classList.contains('active');
+            
+            // अगर तुम चाहते हो कि एक बार में सिर्फ एक ही कार्ड खुले, तो ये लाइन सभी खुले कार्ड्स को बंद कर देगी:
+            let allCards = document.querySelectorAll('.faq-card');
+            allCards.forEach(card => {
+                card.classList.remove('active');
+            });
+
+            // अगर कार्ड बंद था, तो अब उसे खोल दो (क्लास 'active' लगा दो)
+            if (!isActive) {
+                clickedCard.classList.add('active');
+            }
+        }
+
+        // टोस्ट नोटिफिकेशन दिखाने का फंक्शन 🔔
+        function showToast(msg) {
+            const toast = document.getElementById('toastMsg');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2500);
+        }
+    </script>
+</body>
+</html>
+
+
