@@ -3,172 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Your Video</title>
+    <title>OurTube - Upload Video</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 
     <style>
-        /* पूरी वेबसाइट का बेसिक डिज़ाइन 🎨 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
+        /* === बेसिक सेटअप === */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { background-color: #f4f6f8; color: #111; padding-top: 70px; padding-bottom: 90px; }
 
-        body {
-            background-color: #f4f4f9;
-            color: #333;
-            /* ऊपर और नीचे जगह छोड़ी है ताकि हेडर और नेविगेशन बार कंटेंट को ना छुपाएं */
-            padding-top: 60px; 
-            padding-bottom: 80px; 
-        }
-
-        /* 🔝 ऊपर वाला टॉप बार (YouTube Jaisa) */
+        /* === टॉप बार === */
         .top-bar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            height: 60px;
-            background-color: white;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 1000;
+            position: fixed; top: 0; width: 100%; height: 60px; background: white;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100;
         }
-        .top-bar img {
-            height: 30px; /* तुम्हारा लोगो यहाँ आएगा */
+        .top-bar img { height: 35px; border-radius: 5px; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+
+        /* === मेन कंटेनर === */
+        .main-container { max-width: 500px; margin: 0 auto; padding: 0 15px; }
+        
+        .page-title { text-align: center; margin-bottom: 20px; font-size: 22px; color: #ff0000; font-weight: bold; }
+
+        /* === एनिमेटेड 3D कार्ड्स (Animated Cards) === */
+        .step-card {
+            background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eee;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .step-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); } /* Hover Animation */
+        
+        .step-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #333; display: flex; align-items: center; gap: 8px; }
+        .step-title i { color: #065fd4; font-size: 20px; }
+
+        /* === फॉर्म इनपुट्स === */
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; font-weight: bold; }
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 10px;
+            font-size: 14px; outline: none; transition: border 0.3s; background: #fafafa;
+        }
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus { border-color: #065fd4; background: white; }
+
+        /* === बटन्स (Buttons) === */
+        .btn-upload {
+            width: 100%; padding: 14px; background: #e5f1fb; color: #065fd4;
+            border: 2px dashed #065fd4; border-radius: 10px; font-weight: bold; cursor: pointer;
+            font-size: 15px; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .btn-upload:hover { background: #065fd4; color: white; border-style: solid; }
+
+        .btn-publish {
+            width: 100%; padding: 16px; background: #ff0000; color: white;
+            border: none; border-radius: 12px; font-weight: bold; cursor: pointer;
+            font-size: 18px; transition: 0.3s; box-shadow: 0 4px 10px rgba(255,0,0,0.3);
+        }
+        .btn-publish:hover { background: #cc0000; transform: scale(1.02); }
+
+        .success-text { color: #28a745; font-size: 13px; font-weight: bold; margin-top: 10px; display: none; text-align: center; }
+
+        /* थंबनेल कार्ड शुरुआत में छुपा रहेगा */
+        #thumbnailCard { display: none; }
+
+        /* === टोस्ट नोटिफिकेशन (Toast) === */
+        .toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.85); color: white; padding: 12px 25px;
+            border-radius: 30px; font-size: 14px; font-weight: bold; display: none; z-index: 9999;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
-        /* 📜 रूल्स वाला बॉक्स (Rules Container) */
-        .rules-box {
-            background-color: white;
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        .rules-box h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 22px;
-            color: #111;
-        }
-        .rules-list {
-            list-style: none;
-        }
-        .rules-list li {
-            margin-bottom: 15px;
-            font-size: 16px;
-            line-height: 1.5;
-            display: flex;
-            align-items: flex-start;
-        }
-        /* रूल्स के आगे वाले आइकन्स का रंग */
-        .rules-list li i.fa-circle-xmark { color: #ff4d4d; margin-right: 10px; margin-top: 3px; font-size: 18px; }
-        .rules-list li i.fa-circle-check { color: #28a745; margin-right: 10px; margin-top: 3px; font-size: 18px; }
-        .rules-list li i.fa-clock { color: #ff9900; margin-right: 10px; margin-top: 3px; font-size: 18px; }
-        .rules-list li i.fa-shield-halved { color: #666; margin-right: 10px; margin-top: 3px; font-size: 18px; }
-
-        /* 🚀 अपलोड बटन का डिज़ाइन */
-        .upload-btn {
-            display: block;
-            width: 100%;
-            background-color: #ff0000; /* यूट्यूब रेड */
-            color: white;
-            text-align: center;
-            padding: 15px;
-            margin-top: 25px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        .upload-btn:hover {
-            background-color: #cc0000;
-        }
-
-        /* 🔽 नीचे वाला नेविगेशन बार (Bottom Nav) */
+        /* === बॉटम नेविगेशन === */
         .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 60px;
-            background-color: white;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-            z-index: 1000;
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: white;
+            display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000;
         }
-        .nav-item {
-            text-decoration: none;
-            color: #606060;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 12px;
-            width: 25%;
-        }
-        .nav-item i {
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-        .nav-item:hover {
-            color: #111;
-        }
-        /* 'Create' पेज खुला है, इसलिए इसका रंग लाल और एक्टिव रहेगा */
-        .nav-item.active {
-            color: #ff0000;
-        }
+        .nav-item { text-decoration: none; color: #606060; display: flex; flex-direction: column; align-items: center; font-size: 11px; }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-item.active { color: #ff0000; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <img src="http://image.bb/iconinc.png" alt="Logo">
+        <img src="https://i.ibb.co/RTHY13dF/IMG-20260414-ART0004.jpg" alt="Logo" oncontextmenu="return false;" draggable="false">
     </div>
 
-    <div class="rules-box">
-        <h2><i class="fa-solid fa-file-video"></i> Upload Your Video</h2>
+    <div class="toast" id="toastMsg">Message Here</div>
+
+    <div class="main-container">
         
-        <ul class="rules-list">
-            <li><i class="fa-solid fa-circle-xmark"></i> <b>कोई कॉपीराइट नहीं:</b> किसी और का वीडियो (Copyright) अपलोड न करें।</li>
-            <li><i class="fa-solid fa-circle-xmark"></i> <b>फालतू वीडियो नहीं:</b> स्पैम या बिना मतलब के वीडियो न डालें।</li>
-            <li><i class="fa-solid fa-circle-check"></i> <b>थंबनेल (Thumbnail):</b> आप अपना खुद का थंबनेल अपलोड कर सकते हैं।</li>
-            <li><i class="fa-solid fa-circle-xmark"></i> <b>मूवीज न डालें:</b> पूरी फिल्में (Movies) या टीवी शो डालना सख्त मना है।</li>
-            <li><i class="fa-solid fa-circle-check"></i> <b>वीडियो साइज़:</b> मेन वीडियो का साइज़ 100MB से कम होना चाहिए।</li>
-            <li><i class="fa-solid fa-clock"></i> <b>मैन्युअल रिव्यू:</b> हर वीडियो चेक किया जाएगा। इसमें 1 से 24 घंटे तक लग सकते हैं।</li>
-            <li><i class="fa-solid fa-circle-xmark"></i> <b>कोई हिंसा नहीं:</b> हिंसा (Violence) या गलत कंटेंट होने पर वीडियो अपलोड नहीं होगा।</li>
-            <li><i class="fa-solid fa-shield-halved"></i> <b>T&C Apply:</b> सभी नियम और शर्तें लागू हैं।</li>
-        </ul>
+        <div class="page-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Creator Studio</div>
 
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLScwYQFLfaO3h777QpQj1_GoVSyFpiANJ93WdorM5rqMjEHHaA/viewform" target="_blank" class="upload-btn">
-            <i class="fa-solid fa-cloud-arrow-up"></i> Agree & Upload Video
-        </a>
+        <form action="https://docs.google.com/forms/d/e/1FAIpQLScwYQFLfaO3h777QpQj1_GoVSyFpiANJ93WdorM5rqMjEHHaA/formResponse" method="POST" target="hidden_iframe" id="uploadForm">
+            
+            <div class="step-card">
+                <div class="step-title"><i class="fa-solid fa-cloud-arrow-up"></i> Step 1: Upload Video</div>
+                <button type="button" id="upload_video_btn" class="btn-upload">
+                    <i class="fa-solid fa-video"></i> Select Video File
+                </button>
+                <div id="video_success" class="success-text">✅ Video Uploaded Successfully!</div>
+                
+                <input type="hidden" id="videoLinkInput" name="entry.478593853" required>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title"><i class="fa-solid fa-pen-to-square"></i> Step 2: Video Details</div>
+                
+                <div class="input-group">
+                    <label>Video Title (टाइटल)</label>
+                    <input type="text" name="entry.1807265949" placeholder="Catchy title here..." required>
+                </div>
+
+                <div class="input-group">
+                    <label>Description (विवरण)</label>
+                    <textarea name="entry.266075906" placeholder="Tell viewers about your video..." rows="3"></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>Video Format (प्रकार)</label>
+                    <select id="videoTypeSelector" name="entry.755535447" onchange="toggleThumbnailCard()">
+                        <option value="Shorts">Vertical Shorts (9:16)</option>
+                        <option value="Long">Long Video (16:9)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="step-card" id="thumbnailCard">
+                <div class="step-title"><i class="fa-solid fa-image" style="color:#28a745;"></i> Step 3: Thumbnail</div>
+                <p style="font-size:12px; color:#666; margin-bottom:10px;">Long video ke liye ek badhiya photo lagayein.</p>
+                
+                <button type="button" id="upload_thumb_btn" class="btn-upload" style="color:#28a745; border-color:#28a745; background:#e8f5e9;">
+                    <i class="fa-solid fa-image"></i> Upload Custom Thumbnail
+                </button>
+                <div id="thumb_success" class="success-text" style="color:#28a745;">✅ Thumbnail Uploaded!</div>
+                
+                <input type="hidden" id="thumbLinkInput" name="entry.1115628565">
+            </div>
+
+            <button type="submit" class="btn-publish"><i class="fa-solid fa-rocket"></i> Publish Video</button>
+
+        </form>
+
     </div>
+
+    <iframe name="hidden_iframe" style="display:none;"></iframe>
 
     <div class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <i class="fa-solid fa-house"></i>
-            <span>Home</span>
-        </a>
-        <a href="shorts.html" class="nav-item">
-            <i class="fa-solid fa-bolt"></i>
-            <span>Shorts</span>
-        </a>
-        <a href="#" class="nav-item active">
-            <i class="fa-solid fa-circle-plus"></i>
-            <span>Create</span>
-        </a>
-        <a href="about.html" class="nav-item">
-            <i class="fa-solid fa-circle-info"></i>
-            <span>About</span>
-        </a>
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+        <a href="shorts.html" class="nav-item"><i class="fa-solid fa-bolt"></i><span>Shorts</span></a>
+        <a href="#" class="nav-item active"><i class="fa-solid fa-circle-plus"></i><span>Create</span></a>
+        <a href="about.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>About</span></a>
     </div>
 
+    <script>
+        // तुम्हारे Cloudinary की सेटिंग्स ☁️🔑
+        const myCloudName = 'dkssrlsc'; 
+        const myUploadPreset = 'ml_default'; 
+
+        // टोस्ट मेसेज दिखाने वाला फंक्शन
+        function showToast(msg) {
+            const toast = document.getElementById('toastMsg');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        // शॉर्ट्स/लॉन्ग के हिसाब से थंबनेल कार्ड दिखाना या छुपाना 🪄
+        function toggleThumbnailCard() {
+            let type = document.getElementById('videoTypeSelector').value;
+            let thumbCard = document.getElementById('thumbnailCard');
+            if(type === "Long") {
+                thumbCard.style.display = "block";
+            } else {
+                thumbCard.style.display = "none";
+                document.getElementById('thumbLinkInput').value = ""; // शॉर्ट्स के लिए थंबनेल लिंक हटा दो
+            }
+        }
+
+        // === 1. Cloudinary Video Upload Widget ===
+        var videoWidget = cloudinary.createUploadWidget({
+            cloudName: myCloudName, 
+            uploadPreset: myUploadPreset,
+            maxFiles: 1,
+            clientAllowedFormats: ["mp4", "mov", "avi", "mkv"]
+        }, (error, result) => { 
+            if (!error && result && result.event === "success") { 
+                // जादुई तरीके से लिंक छुपाए हुए डिब्बे में भर जाएगा
+                document.getElementById("videoLinkInput").value = result.info.secure_url;
+                
+                // बटन का डिज़ाइन बदल दो
+                let btn = document.getElementById("upload_video_btn");
+                btn.style.background = "#065fd4"; btn.style.color = "white"; btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Video Uploaded';
+                document.getElementById("video_success").style.display = "block";
+                
+                showToast("🎥 Video Uploaded Successfully!");
+            }
+        });
+
+        document.getElementById("upload_video_btn").addEventListener("click", () => videoWidget.open());
+
+        // === 2. Cloudinary Thumbnail Upload Widget ===
+        var thumbWidget = cloudinary.createUploadWidget({
+            cloudName: myCloudName, 
+            uploadPreset: myUploadPreset,
+            maxFiles: 1,
+            clientAllowedFormats: ["jpg", "png", "jpeg", "webp"]
+        }, (error, result) => { 
+            if (!error && result && result.event === "success") { 
+                document.getElementById("thumbLinkInput").value = result.info.secure_url;
+                
+                let btn = document.getElementById("upload_thumb_btn");
+                btn.style.background = "#28a745"; btn.style.color = "white"; btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Thumbnail Uploaded';
+                document.getElementById("thumb_success").style.display = "block";
+                
+                showToast("🖼️ Thumbnail Uploaded!");
+            }
+        });
+
+        document.getElementById("upload_thumb_btn").addEventListener("click", () => thumbWidget.open());
+
+        // === 3. Form Submit Logic ===
+        document.getElementById('uploadForm').onsubmit = function() {
+            // चेक करो कि वीडियो अपलोड हुआ है या नहीं
+            if(!document.getElementById('videoLinkInput').value) {
+                showToast("⚠️ Please upload the video first!");
+                return false; // फॉर्म सबमिट होने से रोको
+            }
+            
+            showToast("🚀 Publishing your video... Please wait!");
+            
+            // 2.5 सेकंड बाद होम पेज पर भेज दो (ताकि बैकग्राउंड में फॉर्म सबमिट हो जाए)
+            setTimeout(() => { 
+                window.location.href = "index.html"; 
+            }, 2500);
+        };
+    </script>
 </body>
 </html>
+
