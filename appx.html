@@ -1,0 +1,110 @@
+```html
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OurTube Admin App</title>
+    <meta name="theme-color" content="#00e676">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- 🌟 जादुई स्क्रिप्ट: बिना अलग फाइल के Manifest (PWA की आत्मा) बनाना -->
+    <script>
+        const manifestJSON = {
+            "name": "OurTube Super Admin",
+            "short_name": "Admin",
+            "start_url": window.location.href, // यही पेज ऐप की तरह खुलेगा
+            "display": "standalone", // इससे ब्राउज़र का URL बार गायब हो जाएगा, एकदम असली ऐप लगेगा
+            "background_color": "#121212",
+            "theme_color": "#00e676",
+            "icons": [
+                { "src": "https://i.ibb.co/RTHY13dF/IMG-20260414-ART0004.jpg", "sizes": "192x192", "type": "image/jpeg" },
+                { "src": "https://i.ibb.co/RTHY13dF/IMG-20260414-ART0004.jpg", "sizes": "512x512", "type": "image/jpeg" }
+            ]
+        };
+        // JSON को लिंक में बदलकर HTML के Head में चिपका दो
+        const manifestData = "data:application/manifest+json;charset=utf-8," + encodeURIComponent(JSON.stringify(manifestJSON));
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = manifestData;
+        document.head.appendChild(link);
+    </script>
+
+    <style>
+        /* एकदम फुल स्क्रीन, बिना किसी बॉर्डर के */
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #121212; }
+        
+        /* Iframe जिसमें तुम्हारी admin.html खुलेगी */
+        iframe { width: 100%; height: 100%; border: none; display: block; }
+        
+        /* PWA इनस्टॉल करने का जादुई बटन */
+        #installBtn {
+            position: fixed; bottom: 30px; right: 20px;
+            background: #00e676; color: #000; border: none;
+            padding: 15px 25px; border-radius: 30px; font-weight: bold;
+            font-size: 16px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,230,118,0.5);
+            display: none; /* शुरुआत में छुपा रहेगा, क्रोम चेक करने के बाद दिखाएगा */
+            z-index: 10000; transition: 0.3s; align-items: center; gap: 10px;
+        }
+        #installBtn:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+    <!-- तुम्हारी admin.html फाइल यहाँ अंदर खुलेगी -->
+    <iframe src="admin.html"></iframe>
+
+    <!-- इनस्टॉल बटन -->
+    <button id="installBtn"><i class="fa-solid fa-download"></i> Install Admin App</button>
+
+    <script>
+        // 🌟 जादुई स्क्रिप्ट: Service Worker (ताकि क्रोम इसे PWA मान ले)
+        const swCode = `
+            self.addEventListener('install', e => self.skipWaiting());
+            self.addEventListener('activate', e => self.clients.claim());
+            self.addEventListener('fetch', e => {}); // डमी फेच, ताकि क्रोम खुश रहे
+        `;
+        const swBlob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(swBlob);
+
+        // Service Worker को रजिस्टर करो
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(swUrl).then(() => {
+                console.log("PWA Service Worker Ready! 🚀");
+            }).catch(err => console.log("Service Worker Error:", err));
+        }
+
+        // === PWA Install Logic (बटन दिखाने और ऐप डाउनलोड करने का सिस्टम) ===
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        // जब ब्राउज़र को लगेगा कि ऐप इनस्टॉल हो सकती है, तो ये इवेंट चलेगा
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); // क्रोम के बोरिंग पॉप-अप को रोको
+            deferredPrompt = e; // इवेंट को सेव करो
+            installBtn.style.display = 'flex'; // अपना मस्त हरा बटन दिखाओ
+        });
+
+        // जब तुम हरे बटन पर क्लिक करोगे
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt(); // क्रोम से पूछो "इनस्टॉल करूँ?"
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('App Installed! 🎉');
+                    installBtn.style.display = 'none'; // इनस्टॉल हो गया तो बटन छुपा दो
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // अगर ऐप पहले से फोन में इनस्टॉल है, तो बटन मत दिखाओ
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
+            alert("OurTube Admin ऐप सफलतापूर्वक इंस्टॉल हो गया! 📱");
+        });
+    </script>
+</body>
+</html>
+
+```
